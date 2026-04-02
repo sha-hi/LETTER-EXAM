@@ -34,7 +34,6 @@ input, select {
   padding: 10px;
   margin: 8px 0;
   border-radius: 10px;
-  border: 1px solid #ccc;
 }
 
 .letter {
@@ -44,20 +43,15 @@ input, select {
 }
 
 button {
-  padding: 10px 18px;
-  margin: 6px;
-  border-radius: 12px;
+  padding: 10px;
+  margin: 5px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
 }
 
-.primary {
-  background: linear-gradient(135deg, #43e97b, #38f9d7);
-}
-.secondary {
-  background: linear-gradient(135deg, #2196f3, #21cbf3);
-  color: white;
-}
+.primary { background: #4caf50; color: white; }
+.secondary { background: #2196f3; color: white; }
 
 .homeBtn {
   position: absolute;
@@ -65,13 +59,6 @@ button {
   right: 10px;
   background: #444;
   color: white;
-}
-
-.scoreboard {
-  font-size: 16px;
-  background: #f1f3f6;
-  padding: 10px;
-  border-radius: 10px;
 }
 
 .leaderboard {
@@ -89,43 +76,42 @@ button {
 <!-- SCREEN 1 -->
 <div id="screen1" class="screen active">
 
-  <h2>🎮 GAME ആരംഭിക്കുക</h2>
+<h3>🎮 Start Game</h3>
 
-  <input type="text" id="playerName" placeholder="പേര് നൽകുക">
+<input type="text" id="playerName" placeholder="Enter Name">
 
-  <select id="timeSelect">
-    <option value="10">10 SECOND</option>
-    <option value="20">20 SECOND</option>
-    <option value="30">30 SECOND</option>
-    <option value="0">UNLIMITED TIME</option>
-  </select>
+<select id="levelSelect" onchange="showLeaderboard()">
+  <option value="level1">Level 1</option>
+  <option value="level2">Level 2</option>
+  <option value="level3">Level 3</option>
+  <option value="level4">Level 4</option>
+</select>
 
-  <button class="primary" onclick="goToGame()">▶️ START</button>
-  <button class="secondary" onclick="clearData()">🗑 Clear</button>
+<select id="timeSelect">
+  <option value="10">10 sec</option>
+  <option value="20">20 sec</option>
+  <option value="30">30 sec</option>
+  <option value="0">Unlimited</option>
+</select>
 
-  <!-- ✅ LEADERBOARD -->
-  <div class="leaderboard" id="leaderboard"></div>
+<button class="primary" onclick="goToGame()">Start</button>
+<button class="secondary" onclick="clearData()">Clear</button>
+
+<div id="leaderboard" class="leaderboard"></div>
 
 </div>
 
 <!-- SCREEN 2 -->
 <div id="screen2" class="screen">
 
-  <button class="homeBtn" onclick="goHome()">🏠</button>
+<button class="homeBtn" onclick="goHome()">🏠</button>
 
-  <div class="scoreboard">
-    👤 <span id="displayName"></span><br>
-    ⏱ <span id="timer">0</span> | ⭐ <span id="score">0</span>
-  </div>
+<h4 id="displayName"></h4>
+<div id="score">0</div>
+<div id="letter" class="letter">بَ</div>
 
-  <div id="letter" class="letter">بَ</div>
-
-  <button class="primary" onclick="startGame()">Start</button>
-
-  <div>
-    <button class="secondary" onclick="previous()" id="prevBtn" disabled>⬅️</button>
-    <button class="secondary" onclick="next()" id="nextBtn" disabled>➡️</button>
-  </div>
+<button onclick="startGame()">Start</button>
+<button onclick="next()">Next</button>
 
 </div>
 
@@ -133,32 +119,27 @@ button {
 
 <script>
 
-/* STORAGE KEYS */
-const SCORE_KEY = "topScores";
-
-/* LOAD SCORES */
-function getScores() {
-  return JSON.parse(localStorage.getItem(SCORE_KEY)) || [];
+/* STORAGE */
+function getScores(level){
+  return JSON.parse(localStorage.getItem(level)) || [];
 }
 
-/* SAVE SCORES */
-function saveScore(name, score) {
-  let scores = getScores();
-  scores.push({name, score});
+function saveScore(level,name,score){
+  let scores = getScores(level);
 
-  // Sort high → low
+  scores.push({name,score});
   scores.sort((a,b)=>b.score-a.score);
-
-  // Keep top 3
   scores = scores.slice(0,3);
 
-  localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
+  localStorage.setItem(level, JSON.stringify(scores));
 }
 
 /* SHOW LEADERBOARD */
-function showLeaderboard() {
-  const scores = getScores();
-  let html = "<b>🏆 Top 3</b><br>";
+function showLeaderboard(){
+  const level = document.getElementById("levelSelect").value;
+  const scores = getScores(level);
+
+  let html = "<b>Top 3 ("+level+")</b><br>";
 
   scores.forEach((s,i)=>{
     html += `${i+1}. ${s.name} - ${s.score}<br>`;
@@ -169,100 +150,78 @@ function showLeaderboard() {
 
 window.onload = showLeaderboard;
 
-/* GAME LOGIC */
-const rawLetters = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر"];
-const harakats = ["َ","ِ","ُ"];
-let letters = [];
+/* GAME */
+const letters = ["بَ","بِ","بُ","تَ","تِ","تُ","ثَ","ثِ","ثُ"];
 
-rawLetters.forEach(l=>{
-  harakats.forEach(h=>{
-    letters.push(l+h);
-  });
-});
-
-let history = [];
-let index = -1;
-let score = 0;
+let score=0;
+let selectedTime=0;
 let timerInterval;
-let selectedTime = 0;
-let currentPlayer = "";
+let currentPlayer="";
+let currentLevel="";
 
-/* START SCREEN */
-function goToGame() {
+function goToGame(){
   const name = document.getElementById("playerName").value.trim();
 
-  if (!name) {
+  if(!name){
     alert("Enter name!");
     return;
   }
 
   currentPlayer = name;
+  currentLevel = document.getElementById("levelSelect").value;
   selectedTime = parseInt(document.getElementById("timeSelect").value);
 
   document.getElementById("displayName").textContent = name;
+
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
 }
 
-/* HOME */
-function goHome() {
+function goHome(){
   clearInterval(timerInterval);
-
   document.getElementById("screen2").classList.remove("active");
   document.getElementById("screen1").classList.add("active");
-
   showLeaderboard();
 }
 
-/* GAME */
-function startGame() {
-  history=[]; index=-1; score=0;
+function startGame(){
+  score=0;
   document.getElementById("score").textContent=0;
-
-  document.getElementById("nextBtn").disabled=false;
-  document.getElementById("prevBtn").disabled=false;
 
   next();
 
   let timeLeft = selectedTime;
 
-  if (selectedTime > 0) {
+  if(selectedTime>0){
     timerInterval = setInterval(()=>{
       timeLeft--;
-      document.getElementById("timer").textContent = timeLeft;
-
-      if (timeLeft<=0){
+      if(timeLeft<=0){
         clearInterval(timerInterval);
 
-        saveScore(currentPlayer, score); // ✅ SAVE SCORE
+        saveScore(currentLevel,currentPlayer,score);
 
-        alert("Time Over! Score: " + score);
+        alert("Score: "+score);
         goHome();
       }
     },1000);
   }
 }
 
-/* LETTER */
-function next() {
+function next(){
   const random = letters[Math.floor(Math.random()*letters.length)];
-  history.push(random);
-  index++;
+  document.getElementById("letter").textContent=random;
   score++;
   document.getElementById("score").textContent=score;
-  document.getElementById("letter").textContent=random;
 }
 
-function previous(){}
-
-/* CLEAR DATA */
+/* CLEAR */
 function clearData(){
-  const pass = prompt("Enter password:");
+  const pass = prompt("Password:");
 
   if(pass==="clear"){
-    localStorage.removeItem(SCORE_KEY);
+    localStorage.clear();
     showLeaderboard();
-    alert("Data Cleared");
+    alert("All scores cleared");
   }else if(pass!==null){
     alert("Wrong password");
   }
