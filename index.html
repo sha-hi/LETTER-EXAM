@@ -63,35 +63,22 @@ button {
   position: absolute;
   top: 10px;
   right: 10px;
-  padding: 6px 10px;
-  font-size: 14px;
-  border-radius: 8px;
   background: #444;
   color: white;
 }
 
 .scoreboard {
-  font-size: 18px;
-  margin-bottom: 10px;
+  font-size: 16px;
   background: #f1f3f6;
   padding: 10px;
   border-radius: 10px;
 }
 
-#toast {
-  position: fixed;
-  bottom: 20px;
-  padding: 12px 20px;
-  border-radius: 12px;
-  color: white;
-  opacity: 0;
-  transition: 0.4s;
+.leaderboard {
+  margin-top: 10px;
+  font-size: 14px;
+  text-align: left;
 }
-
-.show { opacity: 1; }
-.success { background: #4caf50; }
-.info { background: #2196f3; }
-.warn { background: #ff9800; }
 </style>
 </head>
 
@@ -114,9 +101,10 @@ button {
   </select>
 
   <button class="primary" onclick="goToGame()">▶️ START</button>
+  <button class="secondary" onclick="clearData()">🗑 Clear</button>
 
-  <!-- ✅ CLEAR SAVED NAME -->
-  <button class="secondary" onclick="clearSavedName()">🗑 Clear Saved Name</button>
+  <!-- ✅ LEADERBOARD -->
+  <div class="leaderboard" id="leaderboard"></div>
 
 </div>
 
@@ -135,23 +123,54 @@ button {
   <button class="primary" onclick="startGame()">Start</button>
 
   <div>
-    <button class="secondary" onclick="previous()" id="prevBtn" disabled>⬅️ Previous</button>
-    <button class="secondary" onclick="next()" id="nextBtn" disabled>Next ➡️</button>
+    <button class="secondary" onclick="previous()" id="prevBtn" disabled>⬅️</button>
+    <button class="secondary" onclick="next()" id="nextBtn" disabled>➡️</button>
   </div>
 
 </div>
 
 </div>
 
-<div id="toast"></div>
-
 <script>
 
-const rawLetters = [
-  "ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س",
-  "ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"
-];
+/* STORAGE KEYS */
+const SCORE_KEY = "topScores";
 
+/* LOAD SCORES */
+function getScores() {
+  return JSON.parse(localStorage.getItem(SCORE_KEY)) || [];
+}
+
+/* SAVE SCORES */
+function saveScore(name, score) {
+  let scores = getScores();
+  scores.push({name, score});
+
+  // Sort high → low
+  scores.sort((a,b)=>b.score-a.score);
+
+  // Keep top 3
+  scores = scores.slice(0,3);
+
+  localStorage.setItem(SCORE_KEY, JSON.stringify(scores));
+}
+
+/* SHOW LEADERBOARD */
+function showLeaderboard() {
+  const scores = getScores();
+  let html = "<b>🏆 Top 3</b><br>";
+
+  scores.forEach((s,i)=>{
+    html += `${i+1}. ${s.name} - ${s.score}<br>`;
+  });
+
+  document.getElementById("leaderboard").innerHTML = html;
+}
+
+window.onload = showLeaderboard;
+
+/* GAME LOGIC */
+const rawLetters = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر"];
 const harakats = ["َ","ِ","ُ"];
 let letters = [];
 
@@ -166,138 +185,87 @@ let index = -1;
 let score = 0;
 let timerInterval;
 let selectedTime = 0;
+let currentPlayer = "";
 
-const colors = ["#ff4d4d","#4caf50","#2196f3","#ff9800","#9c27b0"];
-
-function showToast(msg,type="info") {
-  const toast = document.getElementById("toast");
-  toast.textContent = msg;
-  toast.className = "show " + type;
-  setTimeout(()=>toast.className="",2000);
-}
-
-/* LOAD SAVED NAME */
-window.onload = function() {
-  const savedName = localStorage.getItem("playerName");
-  if (savedName) {
-    document.getElementById("playerName").value = savedName;
-  }
-};
-
-/* START GAME */
+/* START SCREEN */
 function goToGame() {
-  const name = document.getElementById("playerName").value || "Student";
+  const name = document.getElementById("playerName").value.trim();
+
+  if (!name) {
+    alert("Enter name!");
+    return;
+  }
+
+  currentPlayer = name;
   selectedTime = parseInt(document.getElementById("timeSelect").value);
 
-  // ✅ Save name
-  localStorage.setItem("playerName", name);
-
   document.getElementById("displayName").textContent = name;
-  document.getElementById("timer").textContent = selectedTime || "∞";
-
   document.getElementById("screen1").classList.remove("active");
   document.getElementById("screen2").classList.add("active");
-
-  showToast("Ready!", "info");
 }
 
 /* HOME */
 function goHome() {
   clearInterval(timerInterval);
 
-  document.getElementById("nextBtn").disabled = true;
-  document.getElementById("prevBtn").disabled = true;
-
   document.getElementById("screen2").classList.remove("active");
   document.getElementById("screen1").classList.add("active");
 
-  showToast("Home Screen", "info");
+  showLeaderboard();
 }
 
-/* CLEAR ONLY SAVED NAME */
-function clearSavedName() {
-
-  const password = prompt("Enter password to clear saved name:");
-
-  if (password === null) return;
-
-  if (password === "clear") {
-
-    localStorage.removeItem("playerName");
-    document.getElementById("playerName").value = "";
-
-    showToast("Saved name cleared!", "success");
-
-  } else {
-    showToast("Wrong password!", "warn");
-  }
-}
-
-/* UPDATE LETTER */
-function updateLetter() {
-  const letterDiv = document.getElementById("letter");
-  letterDiv.textContent = history[index];
-  letterDiv.style.color = colors[Math.floor(Math.random()*colors.length)];
-}
-
-function next() {
-  if (index < history.length - 1) {
-    index++;
-  } else {
-    const randomLetter = letters[Math.floor(Math.random()*letters.length)];
-    history.push(randomLetter);
-    index++;
-    score++;
-    document.getElementById("score").textContent = score;
-    showToast("+1 Point!", "success");
-  }
-  updateLetter();
-}
-
-function previous() {
-  if (index > 0) {
-    index--;
-    updateLetter();
-    showToast("Previous", "warn");
-  }
-}
-
+/* GAME */
 function startGame() {
+  history=[]; index=-1; score=0;
+  document.getElementById("score").textContent=0;
 
-  document.getElementById("nextBtn").disabled = false;
-  document.getElementById("prevBtn").disabled = false;
-
-  history = [];
-  index = -1;
-  score = 0;
-
-  document.getElementById("score").textContent = 0;
+  document.getElementById("nextBtn").disabled=false;
+  document.getElementById("prevBtn").disabled=false;
 
   next();
 
-  clearInterval(timerInterval);
+  let timeLeft = selectedTime;
 
   if (selectedTime > 0) {
-    let timeLeft = selectedTime;
-
     timerInterval = setInterval(()=>{
       timeLeft--;
       document.getElementById("timer").textContent = timeLeft;
 
-      if (timeLeft <= 0) {
+      if (timeLeft<=0){
         clearInterval(timerInterval);
-        document.getElementById("nextBtn").disabled = true;
-        document.getElementById("prevBtn").disabled = true;
-        showToast("Time Over!", "warn");
-        alert("⏱ സമയം കഴിഞ്ഞു! സ്കോർ: " + score);
+
+        saveScore(currentPlayer, score); // ✅ SAVE SCORE
+
+        alert("Time Over! Score: " + score);
+        goHome();
       }
     },1000);
-
-  } else {
-    document.getElementById("timer").textContent = "∞";
   }
+}
 
-  showToast("Game Started!", "success");
+/* LETTER */
+function next() {
+  const random = letters[Math.floor(Math.random()*letters.length)];
+  history.push(random);
+  index++;
+  score++;
+  document.getElementById("score").textContent=score;
+  document.getElementById("letter").textContent=random;
+}
+
+function previous(){}
+
+/* CLEAR DATA */
+function clearData(){
+  const pass = prompt("Enter password:");
+
+  if(pass==="clear"){
+    localStorage.removeItem(SCORE_KEY);
+    showLeaderboard();
+    alert("Data Cleared");
+  }else if(pass!==null){
+    alert("Wrong password");
+  }
 }
 
 </script>
