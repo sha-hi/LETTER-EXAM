@@ -27,7 +27,6 @@ body {
 .screen { display: none; }
 .active { display: block; }
 
-/* IMPORTANT for Home button */
 #screen2 { position: relative; }
 
 input, select {
@@ -60,7 +59,6 @@ button {
   color: white;
 }
 
-/* Home Button */
 .homeBtn {
   position: absolute;
   top: 10px;
@@ -94,9 +92,9 @@ button {
 .success { background: #4caf50; }
 .info { background: #2196f3; }
 .warn { background: #ff9800; }
-
 </style>
 </head>
+
 <body>
 
 <div class="container">
@@ -117,12 +115,14 @@ button {
 
   <button class="primary" onclick="goToGame()">▶️ START</button>
 
+  <!-- ✅ CLEAR SAVED NAME -->
+  <button class="secondary" onclick="clearSavedName()">🗑 Clear Saved Name</button>
+
 </div>
 
 <!-- SCREEN 2 -->
 <div id="screen2" class="screen">
 
-  <!-- 🏠 Home Button -->
   <button class="homeBtn" onclick="goHome()">🏠</button>
 
   <div class="scoreboard">
@@ -176,10 +176,21 @@ function showToast(msg,type="info") {
   setTimeout(()=>toast.className="",2000);
 }
 
-/* Go to Game */
+/* LOAD SAVED NAME */
+window.onload = function() {
+  const savedName = localStorage.getItem("playerName");
+  if (savedName) {
+    document.getElementById("playerName").value = savedName;
+  }
+};
+
+/* START GAME */
 function goToGame() {
   const name = document.getElementById("playerName").value || "Student";
   selectedTime = parseInt(document.getElementById("timeSelect").value);
+
+  // ✅ Save name
+  localStorage.setItem("playerName", name);
 
   document.getElementById("displayName").textContent = name;
   document.getElementById("timer").textContent = selectedTime || "∞";
@@ -190,7 +201,7 @@ function goToGame() {
   showToast("Ready!", "info");
 }
 
-/* 🏠 Home Function */
+/* HOME */
 function goHome() {
   clearInterval(timerInterval);
 
@@ -203,7 +214,26 @@ function goHome() {
   showToast("Home Screen", "info");
 }
 
-/* Update Letter */
+/* CLEAR ONLY SAVED NAME */
+function clearSavedName() {
+
+  const password = prompt("Enter password to clear saved name:");
+
+  if (password === null) return;
+
+  if (password === "clear") {
+
+    localStorage.removeItem("playerName");
+    document.getElementById("playerName").value = "";
+
+    showToast("Saved name cleared!", "success");
+
+  } else {
+    showToast("Wrong password!", "warn");
+  }
+}
+
+/* UPDATE LETTER */
 function updateLetter() {
   const letterDiv = document.getElementById("letter");
   letterDiv.textContent = history[index];
