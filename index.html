@@ -20,26 +20,21 @@ body {
   width: 340px;
   padding: 25px;
   border-radius: 20px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
   text-align: center;
 }
 
 .screen { display: none; }
 .active { display: block; }
 
-#screen2 { position: relative; }
-
 input, select {
   width: 80%;
   padding: 10px;
-  margin: 8px 0;
-  border-radius: 10px;
+  margin: 8px;
 }
 
 .letter {
-  font-size: 110px;
+  font-size: 100px;
   margin: 20px;
-  font-weight: bold;
 }
 
 button {
@@ -47,7 +42,6 @@ button {
   margin: 5px;
   border-radius: 10px;
   border: none;
-  cursor: pointer;
 }
 
 .primary { background: #4caf50; color: white; }
@@ -57,8 +51,6 @@ button {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: #444;
-  color: white;
 }
 
 .leaderboard {
@@ -80,18 +72,11 @@ button {
 
 <input type="text" id="playerName" placeholder="Enter Name">
 
-<select id="levelSelect" onchange="showLeaderboard()">
-  <option value="level1">Level 1</option>
-  <option value="level2">Level 2</option>
-  <option value="level3">Level 3</option>
-  <option value="level4">Level 4</option>
-</select>
-
-<select id="timeSelect">
-  <option value="10">10 sec</option>
-  <option value="20">20 sec</option>
-  <option value="30">30 sec</option>
-  <option value="0">Unlimited</option>
+<select id="timeSelect" onchange="showLeaderboard()">
+  <option value="10">10 SECOND</option>
+  <option value="20">20 SECOND</option>
+  <option value="30">30 SECOND</option>
+  <option value="0">UNLIMITED</option>
 </select>
 
 <button class="primary" onclick="goToGame()">Start</button>
@@ -119,27 +104,34 @@ button {
 
 <script>
 
-/* STORAGE */
-function getScores(level){
-  return JSON.parse(localStorage.getItem(level)) || [];
+/* 🔑 STORAGE KEY BASE */
+function getKey(time){
+  return "score_"+time;
 }
 
-function saveScore(level,name,score){
-  let scores = getScores(level);
+/* GET SCORES */
+function getScores(time){
+  return JSON.parse(localStorage.getItem(getKey(time))) || [];
+}
+
+/* SAVE SCORE */
+function saveScore(time,name,score){
+  let scores = getScores(time);
 
   scores.push({name,score});
   scores.sort((a,b)=>b.score-a.score);
   scores = scores.slice(0,3);
 
-  localStorage.setItem(level, JSON.stringify(scores));
+  localStorage.setItem(getKey(time), JSON.stringify(scores));
 }
 
 /* SHOW LEADERBOARD */
 function showLeaderboard(){
-  const level = document.getElementById("levelSelect").value;
-  const scores = getScores(level);
+  const time = document.getElementById("timeSelect").value;
+  const scores = getScores(time);
 
-  let html = "<b>Top 3 ("+level+")</b><br>";
+  let label = time == 0 ? "Unlimited" : time + " sec";
+  let html = "<b>🏆 Top 3 ("+label+")</b><br>";
 
   scores.forEach((s,i)=>{
     html += `${i+1}. ${s.name} - ${s.score}<br>`;
@@ -150,15 +142,15 @@ function showLeaderboard(){
 
 window.onload = showLeaderboard;
 
-/* GAME */
+/* GAME DATA */
 const letters = ["بَ","بِ","بُ","تَ","تِ","تُ","ثَ","ثِ","ثُ"];
 
 let score=0;
 let selectedTime=0;
 let timerInterval;
 let currentPlayer="";
-let currentLevel="";
 
+/* START */
 function goToGame(){
   const name = document.getElementById("playerName").value.trim();
 
@@ -168,7 +160,6 @@ function goToGame(){
   }
 
   currentPlayer = name;
-  currentLevel = document.getElementById("levelSelect").value;
   selectedTime = parseInt(document.getElementById("timeSelect").value);
 
   document.getElementById("displayName").textContent = name;
@@ -177,6 +168,7 @@ function goToGame(){
   document.getElementById("screen2").classList.add("active");
 }
 
+/* HOME */
 function goHome(){
   clearInterval(timerInterval);
   document.getElementById("screen2").classList.remove("active");
@@ -184,6 +176,7 @@ function goHome(){
   showLeaderboard();
 }
 
+/* START GAME */
 function startGame(){
   score=0;
   document.getElementById("score").textContent=0;
@@ -195,10 +188,11 @@ function startGame(){
   if(selectedTime>0){
     timerInterval = setInterval(()=>{
       timeLeft--;
+
       if(timeLeft<=0){
         clearInterval(timerInterval);
 
-        saveScore(currentLevel,currentPlayer,score);
+        saveScore(selectedTime,currentPlayer,score);
 
         alert("Score: "+score);
         goHome();
@@ -207,6 +201,7 @@ function startGame(){
   }
 }
 
+/* NEXT */
 function next(){
   const random = letters[Math.floor(Math.random()*letters.length)];
   document.getElementById("letter").textContent=random;
@@ -214,7 +209,7 @@ function next(){
   document.getElementById("score").textContent=score;
 }
 
-/* CLEAR */
+/* CLEAR ALL SCORES */
 function clearData(){
   const pass = prompt("Password:");
 
