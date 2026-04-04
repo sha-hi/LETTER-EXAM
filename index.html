@@ -2,61 +2,63 @@
 <html lang="ml">
 <head>
 <meta charset="UTF-8">
-<title>ഹറഖത്ത് ചലഞ്ച്</title>
+<title>ഹറഖത്ത് ചലഞ്ച് FINAL</title>
 
 <style>
 body {
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Scheherazade', serif;
-  background: linear-gradient(135deg, #667eea, #764ba2);
+  margin:0;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-family:'Scheherazade', serif;
+  background:linear-gradient(135deg,#667eea,#764ba2);
 }
 
 .container {
-  background: #ffffff;
-  width: 340px;
-  padding: 25px;
-  border-radius: 20px;
-  text-align: center;
+  background:#fff;
+  width:360px;
+  padding:20px;
+  border-radius:20px;
+  text-align:center;
 }
 
-.screen { display: none; }
-.active { display: block; }
+.screen { display:none; }
+.active { display:block; }
 
-input, select {
-  width: 80%;
-  padding: 10px;
-  margin: 8px;
-}
-
-.letter {
-  font-size: 100px;
-  margin: 20px;
+input,select {
+  width:85%;
+  padding:10px;
+  margin:8px 0;
 }
 
 button {
-  padding: 10px;
-  margin: 5px;
-  border-radius: 10px;
-  border: none;
+  padding:10px;
+  margin:5px;
+  border-radius:10px;
+  border:none;
+  cursor:pointer;
 }
 
-.primary { background: #4caf50; color: white; }
-.secondary { background: #2196f3; color: white; }
+.primary { background:#4caf50; color:white; }
+.secondary { background:#2196f3; color:white; }
 
-.homeBtn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.letter {
+  font-size:120px;
+  margin:20px;
 }
 
-.leaderboard {
-  margin-top: 10px;
-  font-size: 14px;
-  text-align: left;
+/* COLORS */
+.base { color:#000; }
+.fatha { color:red; }
+.kasra { color:blue; }
+.damma { color:green; }
+
+.resultBox {
+  background:#f1f3f6;
+  padding:15px;
+  border-radius:10px;
+  margin-top:15px;
 }
 </style>
 </head>
@@ -68,35 +70,52 @@ button {
 <!-- SCREEN 1 -->
 <div id="screen1" class="screen active">
 
-<h3>🎮 Start Game</h3>
+<h2>🎮 GAME ആരംഭിക്കുക</h2>
 
-<input type="text" id="playerName" placeholder="Enter Name">
+<input type="text" id="playerName" placeholder="പേര് നൽകുക">
 
-<select id="timeSelect" onchange="showLeaderboard()">
-  <option value="10">10 SECOND</option>
-  <option value="20">20 SECOND</option>
-  <option value="30">30 SECOND</option>
-  <option value="0">UNLIMITED</option>
+<select id="levelSelect">
+  <option value="1">Level 1 (10 Letters)</option>
+  <option value="2">Level 2 (20 Letters)</option>
+  <option value="3">Level 3 (Full)</option>
 </select>
 
-<button class="primary" onclick="goToGame()">Start</button>
-<button class="secondary" onclick="clearData()">Clear</button>
+<select id="timeSelect">
+  <option value="10">10 sec</option>
+  <option value="20">20 sec</option>
+  <option value="30">30 sec</option>
+</select>
 
-<div id="leaderboard" class="leaderboard"></div>
+<button class="primary" onclick="goToGame()">▶️ START</button>
 
 </div>
 
-<!-- SCREEN 2 -->
+<!-- SCREEN 2 GAME -->
 <div id="screen2" class="screen">
 
-<button class="homeBtn" onclick="goHome()">🏠</button>
+<div>
+👤 <span id="displayName"></span><br>
+⏱ <span id="timer"></span><br>
+⭐ <span id="score">0</span>
+</div>
 
-<h4 id="displayName"></h4>
-<div id="score">0</div>
-<div id="letter" class="letter">بَ</div>
+<div id="letter" class="letter"></div>
 
-<button onclick="startGame()">Start</button>
-<button onclick="next()">Next</button>
+<button class="primary" onclick="startGame()">Start</button>
+<button class="secondary" onclick="next()">Next ➡️</button>
+
+</div>
+
+<!-- SCREEN 3 RESULT -->
+<div id="screen3" class="screen">
+
+<h2>🏁 Result</h2>
+
+<div class="resultBox" id="resultText"></div>
+
+<button class="primary" onclick="restart()">🔁 Play Again</button>
+
+<button class="secondary" onclick="shareToUsthad()">📤 Share to Usthad</button>
 
 </div>
 
@@ -104,122 +123,126 @@ button {
 
 <script>
 
-/* 🔑 STORAGE KEY BASE */
-function getKey(time){
-  return "score_"+time;
-}
+/* LETTERS */
+const arabicLetters = [
+"ا","ب","ت","ث","ج","ح","خ","د","ذ","ر",
+"ز","س","ش","ص","ض","ط","ظ","ع","غ","ف",
+"ق","ك","ل","م","ن","ه","و","ي"
+];
 
-/* GET SCORES */
-function getScores(time){
-  return JSON.parse(localStorage.getItem(getKey(time))) || [];
-}
+const harakat = [
+{mark:"َ", class:"fatha"},
+{mark:"ِ", class:"kasra"},
+{mark:"ُ", class:"damma"}
+];
 
-/* SAVE SCORE */
-function saveScore(time,name,score){
-  let scores = getScores(time);
-
-  scores.push({name,score});
-  scores.sort((a,b)=>b.score-a.score);
-  scores = scores.slice(0,3);
-
-  localStorage.setItem(getKey(time), JSON.stringify(scores));
-}
-
-/* SHOW LEADERBOARD */
-function showLeaderboard(){
-  const time = document.getElementById("timeSelect").value;
-  const scores = getScores(time);
-
-  let label = time == 0 ? "Unlimited" : time + " sec";
-  let html = "<b>🏆 Top 3 ("+label+")</b><br>";
-
-  scores.forEach((s,i)=>{
-    html += `${i+1}. ${s.name} - ${s.score}<br>`;
+function generateLetters(count){
+  let arr = arabicLetters.slice(0,count);
+  let result=[];
+  arr.forEach(l=>{
+    harakat.forEach(h=>{
+      result.push({base:l, mark:h.mark, class:h.class});
+    });
   });
-
-  document.getElementById("leaderboard").innerHTML = html;
+  return result;
 }
 
-window.onload = showLeaderboard;
+function getLetters(level){
+  if(level==1) return generateLetters(10);
+  if(level==2) return generateLetters(20);
+  return generateLetters(28);
+}
 
-/* GAME DATA */
-const letters = ["بَ","بِ","بُ","تَ","تِ","تُ","ثَ","ثِ","ثُ"];
+function renderLetter(o){
+  return `<span class="base">${o.base}</span><span class="${o.class}">${o.mark}</span>`;
+}
 
-let score=0;
-let selectedTime=0;
-let timerInterval;
-let currentPlayer="";
+/* STATE */
+let letters=[], score=0, timer=null, time=0, player="";
 
-/* START */
+/* NAV */
 function goToGame(){
-  const name = document.getElementById("playerName").value.trim();
+  const name=document.getElementById("playerName").value.trim();
+  if(!name){ alert("Enter name"); return; }
 
-  if(!name){
-    alert("Enter name!");
-    return;
-  }
+  player=name;
+  const level=document.getElementById("levelSelect").value;
+  letters=getLetters(level);
+  time=parseInt(document.getElementById("timeSelect").value);
 
-  currentPlayer = name;
-  selectedTime = parseInt(document.getElementById("timeSelect").value);
+  document.getElementById("displayName").textContent=name;
 
-  document.getElementById("displayName").textContent = name;
-
-  document.getElementById("screen1").classList.remove("active");
-  document.getElementById("screen2").classList.add("active");
+  showScreen(2);
 }
 
-/* HOME */
-function goHome(){
-  clearInterval(timerInterval);
-  document.getElementById("screen2").classList.remove("active");
-  document.getElementById("screen1").classList.add("active");
-  showLeaderboard();
+/* SCREEN SWITCH */
+function showScreen(n){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById("screen"+n).classList.add("active");
 }
 
-/* START GAME */
+/* GAME */
 function startGame(){
   score=0;
   document.getElementById("score").textContent=0;
 
   next();
 
-  let timeLeft = selectedTime;
+  let t=time;
+  document.getElementById("timer").textContent=t;
 
-  if(selectedTime>0){
-    timerInterval = setInterval(()=>{
-      timeLeft--;
+  clearInterval(timer);
+  timer=setInterval(()=>{
+    t--;
+    document.getElementById("timer").textContent=t;
 
-      if(timeLeft<=0){
-        clearInterval(timerInterval);
-
-        saveScore(selectedTime,currentPlayer,score);
-
-        alert("Score: "+score);
-        goHome();
-      }
-    },1000);
-  }
+    if(t<=0){
+      clearInterval(timer);
+      endGame();
+    }
+  },1000);
 }
 
-/* NEXT */
 function next(){
-  const random = letters[Math.floor(Math.random()*letters.length)];
-  document.getElementById("letter").textContent=random;
+  const r=letters[Math.floor(Math.random()*letters.length)];
+  document.getElementById("letter").innerHTML=renderLetter(r);
   score++;
   document.getElementById("score").textContent=score;
 }
 
-/* CLEAR ALL SCORES */
-function clearData(){
-  const pass = prompt("Password:");
+/* END GAME */
+function endGame(){
+  const date = new Date().toLocaleString();
 
-  if(pass==="clear"){
-    localStorage.clear();
-    showLeaderboard();
-    alert("All scores cleared");
-  }else if(pass!==null){
-    alert("Wrong password");
+  const text =
+`👤 ${player}
+⭐ Score: ${score}
+📅 ${date}`;
+
+  document.getElementById("resultText").innerText = text;
+
+  window.finalMessage = text;
+
+  showScreen(3);
+}
+
+/* SHARE */
+function shareToUsthad(){
+  const msg = `🎮 Harakat Challenge Result\n\n${window.finalMessage}`;
+
+  if(navigator.share){
+    navigator.share({
+      text: msg
+    });
+  } else {
+    const url = "https://wa.me/?text=" + encodeURIComponent(msg);
+    window.open(url, "_blank");
   }
+}
+
+/* RESTART */
+function restart(){
+  showScreen(1);
 }
 
 </script>
