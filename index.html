@@ -310,19 +310,33 @@
                 <input type="text" id="playerName" placeholder="Enter your name" dir="ltr">
             </div>
 
+            <h3>Select Section</h3>
+            <div class="level-grid" style="margin-top: 10px; margin-bottom: 20px;">
+                <button class="level-btn selected" id="sec1Btn" onclick="selectSection(1)">Section 1<br><small>Basic Harakat</small></button>
+                <button class="level-btn" id="sec2Btn" onclick="selectSection(2)">Section 2<br><small>With Tanween</small></button>
+                <button class="level-btn" id="sec3Btn" onclick="selectSection(3)" style="grid-column: 1 / -1;">Practice<br><small>Unlimited Time</small></button>
+            </div>
+
+            <button class="btn-main" onclick="goToLevelSelect()">NEXT ➡️</button>
+        </div>
+
+        <!-- SCREEN LEVEL SELECT -->
+        <div id="screenLevelSelect" class="screen">
             <h3>Select Level</h3>
             <div class="level-grid" id="levelGrid">
                 <!-- Levels will be injected here -->
             </div>
-
-            <button class="btn-main" onclick="goToGame()">LET'S GO 🚀</button>
+            <div style="display: flex; gap: 10px; justify-content: center; margin-top: 25px;">
+                <button class="btn-main" style="background: #95a5a6; margin-top: 0;" onclick="showScreen('screen1')">BACK ⬅️</button>
+                <button class="btn-main" style="margin-top: 0;" onclick="goToGame()">LET'S GO 🚀</button>
+            </div>
         </div>
 
         <!-- SCREEN 2: GAME -->
         <div id="screen2" class="screen">
             <div class="stats">
                 <span>⭐ Score: <span id="currentScore">0</span></span>
-                <span>🏆 Goal: <span id="targetScore">15</span></span>
+                <span id="goalContainer">🏆 Goal: <span id="targetScore">15</span></span>
             </div>
             <div class="timer-bar">
                 <div id="timerFill" class="timer-fill"></div>
@@ -333,7 +347,8 @@
             </div>
 
             <div class="game-buttons">
-                <button class="btn-next" onclick="nextLetter()">NEXT ➡️</button>
+                <button id="gameHomeBtn" class="btn-next" style="background: #95a5a6; width: auto; padding: 20px 30px; display: none;" onclick="mainMenu()">🏠</button>
+                <button class="btn-next" onclick="nextLetter()" style="flex: 1;">NEXT ➡️</button>
             </div>
 
             <p style="margin-top: 20px; color: #666; font-size: 0.9rem;">Tap Next after saying the letter!</p>
@@ -348,6 +363,7 @@
             </div>
 
             <button class="btn-main" onclick="restart()">TRY AGAIN 🔄</button>
+            <button class="btn-main" style="background: #95a5a6; margin-top: 10px;" onclick="mainMenu()">MAIN MENU 🏠</button>
             <button id="shareBtn" class="btn-main" style="background: #25D366; margin-top: 10px;"
                 onclick="shareResult()">SHARE SCREENSHOT 📸</button>
         </div>
@@ -357,11 +373,29 @@
 
     <script>
         const arabicLetters = ["ا", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي"];
-        const harakat = [
-            { mark: "َ", class: "fatha" },
-            { mark: "ِ", class: "kasra" },
-            { mark: "ُ", class: "damma" }
-        ];
+        const harakatSections = {
+            1: [
+                { mark: "َ", class: "fatha" },
+                { mark: "ِ", class: "kasra" },
+                { mark: "ُ", class: "damma" }
+            ],
+            2: [
+                { mark: "َ", class: "fatha" },
+                { mark: "ِ", class: "kasra" },
+                { mark: "ُ", class: "damma" },
+                { mark: "ً", class: "fatha" },
+                { mark: "ٍ", class: "kasra" },
+                { mark: "ٌ", class: "damma" }
+            ],
+            3: [
+                { mark: "َ", class: "fatha" },
+                { mark: "ِ", class: "kasra" },
+                { mark: "ُ", class: "damma" },
+                { mark: "ً", class: "fatha" },
+                { mark: "ٍ", class: "kasra" },
+                { mark: "ٌ", class: "damma" }
+            ]
+        };
 
         const levels = {
             1: { start: 0, end: 7, target: 15, time: 9, label: "Level 1" },
@@ -371,9 +405,33 @@
             5: { start: 0, end: 28, target: 25, time: 13, label: "Level 5" }
         };
 
+        let currentSection = 1;
         let currentLevel = 1;
-        let highestUnlockedLevel = parseInt(localStorage.getItem('unlockedLevel')) || 1;
         let score = 0;
+
+        function getUnlockedLevel(sec) {
+            if (sec === 3) return 5; // All levels unlocked in Practice Mode
+            let val = parseInt(localStorage.getItem('unlockedLevel_sec' + sec));
+            if (isNaN(val)) {
+                if (sec === 1) return parseInt(localStorage.getItem('unlockedLevel')) || 1;
+                return 1;
+            }
+            return val;
+        }
+
+        function setUnlockedLevel(sec, lvl) {
+            localStorage.setItem('unlockedLevel_sec' + sec, lvl);
+            if (sec === 1) localStorage.setItem('unlockedLevel', lvl);
+        }
+
+        function selectSection(sec) {
+            currentSection = sec;
+            document.getElementById('sec1Btn').classList.remove('selected');
+            document.getElementById('sec2Btn').classList.remove('selected');
+            if(document.getElementById('sec3Btn')) document.getElementById('sec3Btn').classList.remove('selected');
+            document.getElementById('sec' + sec + 'Btn').classList.add('selected');
+            currentLevel = 1;
+        }
         let timer = null;
         let timeLeft = 0;
         let player = "";
@@ -383,9 +441,10 @@
         function renderLevels() {
             const grid = document.getElementById('levelGrid');
             grid.innerHTML = '';
+            let unlocked = getUnlockedLevel(currentSection);
             for (let i = 1; i <= 5; i++) {
                 const lvl = levels[i];
-                const isLocked = i > highestUnlockedLevel;
+                const isLocked = i > unlocked;
                 const lockIcon = isLocked ? "🔒 " : "";
                 const btnClass = isLocked ? "level-btn locked" : (i === currentLevel ? "level-btn selected" : "level-btn");
                 grid.innerHTML += `
@@ -405,20 +464,32 @@
         // Initialize levels on load
         renderLevels();
 
-        function goToGame() {
+        function goToLevelSelect() {
             const name = document.getElementById('playerName').value.trim();
             if (!name) {
                 alert("Please enter your name brave explorer!");
                 return;
             }
             player = name;
+            
+            if (currentSection === 3) {
+                // Skip level selection for Practice mode
+                goToGame();
+                return;
+            }
+            
+            renderLevels();
+            showScreen('screenLevelSelect');
+        }
 
+        function goToGame() {
             // Prepare letters for level
             const lvl = levels[currentLevel];
-            const lettersPool = arabicLetters.slice(lvl.start, lvl.end);
+            const lettersPool = currentSection === 3 ? arabicLetters : arabicLetters.slice(lvl.start, lvl.end);
             currentLetters = [];
+            const activeHarakat = harakatSections[currentSection];
             lettersPool.forEach(l => {
-                harakat.forEach(h => {
+                activeHarakat.forEach(h => {
                     currentLetters.push({ base: l, mark: h.mark, class: h.class });
                 });
             });
@@ -427,33 +498,50 @@
             document.getElementById('targetScore').textContent = lvl.target;
             document.getElementById('currentScore').textContent = 0;
             score = 0;
+            
+            if (currentSection === 3) {
+                document.getElementById('gameHomeBtn').style.display = 'block';
+                document.getElementById('goalContainer').style.display = 'none';
+            } else {
+                document.getElementById('gameHomeBtn').style.display = 'none';
+                document.getElementById('goalContainer').style.display = 'inline';
+            }
 
-            showScreen(2);
+            showScreen('screen2');
             startCountdown();
         }
 
-        function showScreen(n) {
+        function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById('screen' + n).classList.add('active');
+            document.getElementById(id).classList.add('active');
         }
 
         function startCountdown() {
             gameActive = true;
-            timeLeft = levels[currentLevel].time;
-            const totalTime = timeLeft;
             nextLetter(true); // Don't count first one
 
             clearInterval(timer);
-            timer = setInterval(() => {
-                timeLeft -= 0.1;
-                const percent = (timeLeft / totalTime) * 100;
-                document.getElementById('timerFill').style.width = percent + "%";
+            const timerContainer = document.querySelector('.timer-bar');
 
-                if (timeLeft <= 0) {
-                    clearInterval(timer);
-                    endGame();
-                }
-            }, 100);
+            if (currentSection === 3) {
+                timerContainer.style.display = 'none';
+            } else {
+                timerContainer.style.display = 'block';
+                timeLeft = levels[currentLevel].time;
+                const totalTime = timeLeft;
+                document.getElementById('timerFill').style.width = "100%";
+                
+                timer = setInterval(() => {
+                    timeLeft -= 0.1;
+                    const percent = (timeLeft / totalTime) * 100;
+                    document.getElementById('timerFill').style.width = percent + "%";
+
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        endGame();
+                    }
+                }, 100);
+            }
         }
 
         function nextLetter(isStart = false) {
@@ -496,26 +584,34 @@
                 detailsEl.innerHTML = `അടിപൊളിയായിട്ടുണ്ട്,  ${player}<br>നിങ്ങൾ  <b>${score}</b> അക്ഷരങ്ങൾ പറഞ്ഞു.<br>വിജയിക്കാൻ ആവശ്യമായത്: ${target}`;
 
                 // Unlock next level if applicable
-                if (currentLevel === highestUnlockedLevel && currentLevel < 5) {
-                    highestUnlockedLevel++;
-                    localStorage.setItem('unlockedLevel', highestUnlockedLevel);
-                    renderLevels();
+                if (currentSection !== 3) {
+                    let unlocked = getUnlockedLevel(currentSection);
+                    if (currentLevel === unlocked && currentLevel < 5) {
+                        setUnlockedLevel(currentSection, unlocked + 1);
+                    }
                 }
 
                 startConfetti();
             } else {
                 statusEl.textContent = "Failed";
                 statusEl.className = "result-status failed";
-                iconEl.textContent = "🦾";
+                iconEl.textContent = "😔";
                 detailsEl.innerHTML = `Good try ${player}<br>നിങ്ങൾ <b>${score}</b> അക്ഷരങ്ങളെ പറഞ്ഞിട്ടുള്ളൂ.<br>വിജയിക്കാൻ ആവശ്യമായത്: ${target}</b> അക്ഷരങ്ങൾ.`;
             }
 
-            showScreen(3);
+            showScreen('screen3');
         }
 
         function restart() {
             stopConfetti();
-            showScreen(1);
+            goToGame();
+        }
+
+        function mainMenu() {
+            gameActive = false;
+            clearInterval(timer);
+            stopConfetti();
+            showScreen('screen1');
         }
 
         async function shareResult() {
