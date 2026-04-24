@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arabic Letter Exam - Children's Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Scheherazade+New:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&family=Scheherazade+New:wght@400;700&display=swap"
+        rel="stylesheet">
     <style>
         :root {
             --primary: #FF6B6B;
@@ -34,36 +37,62 @@
 
         .overlay {
             position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.1);
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.1);
             z-index: -1;
         }
 
         .container {
             background: var(--glass);
             width: 90%;
-            max-width: 450px;
+            max-width: 850px;
             padding: 30px;
             border-radius: 30px;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
-            border: 2px solid rgba(255,255,255,0.5);
+            border: 2px solid rgba(255, 255, 255, 0.5);
             animation: slideUp 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        h1 { color: #FF6B6B; font-size: 2rem; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-        h2 { color: var(--text); }
+        h1 {
+            color: #FF6B6B;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-        .screen { display: none; }
-        .active { display: block; }
+        h2 {
+            color: var(--text);
+        }
 
-        .input-group { margin: 20px 0; }
+        .screen {
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        .input-group {
+            margin: 20px 0;
+        }
+
         input[type="text"] {
             width: 100%;
             padding: 15px;
@@ -75,7 +104,11 @@
             outline: none;
             transition: all 0.3s;
         }
-        input:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(255,107,107,0.2); }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.2);
+        }
 
         .level-grid {
             display: grid;
@@ -93,12 +126,17 @@
             transition: all 0.3s;
             font-weight: 600;
         }
+
         .level-btn.selected {
             border-color: var(--primary);
             background: var(--accent);
             transform: scale(1.05);
         }
-        .level-btn:hover { transform: translateY(-3px); border-color: var(--secondary); }
+
+        .level-btn:hover {
+            transform: translateY(-3px);
+            border-color: var(--secondary);
+        }
 
         .btn-main {
             background: var(--primary);
@@ -110,11 +148,17 @@
             font-weight: 600;
             cursor: pointer;
             margin-top: 25px;
-            box-shadow: 0 10px 20px rgba(255,107,107,0.3);
+            box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
             transition: all 0.3s;
         }
-        .btn-main:active { transform: scale(0.95); }
-        .btn-main:hover { filter: brightness(1.1); }
+
+        .btn-main:active {
+            transform: scale(0.95);
+        }
+
+        .btn-main:hover {
+            filter: brightness(1.1);
+        }
 
         /* Game Screen */
         .stats {
@@ -124,6 +168,7 @@
             font-size: 1.2rem;
             font-weight: 600;
         }
+
         .timer-bar {
             width: 100%;
             height: 12px;
@@ -132,6 +177,7 @@
             overflow: hidden;
             margin-bottom: 20px;
         }
+
         .timer-fill {
             height: 100%;
             background: linear-gradient(90deg, #FF6B6B, #FFE66D);
@@ -141,25 +187,39 @@
 
         .letter-display {
             font-family: 'Scheherazade New', serif;
-            font-size: 180px;
+            font-size: 130px;
             height: 220px;
             display: flex;
             justify-content: center;
             align-items: center;
             margin: 20px 0;
             user-select: none;
-            line-height: 1;
+            line-height: 1.5;
         }
-        .base-letter { color: var(--text); font-weight: bold; }
-        .fatha { color: #FF4757; }
-        .kasra { color: #2E86DE; }
-        .damma { color: #2ED573; }
+
+        .base-letter {
+            color: var(--text);
+            font-weight: bold;
+        }
+
+        .fatha {
+            color: #FF4757;
+        }
+
+        .kasra {
+            color: #2E86DE;
+        }
+
+        .damma {
+            color: #2ED573;
+        }
 
         .game-buttons {
             display: flex;
-            gap: 15px;
+            gap: 5px;
             justify-content: center;
         }
+
         .btn-next {
             background: var(--secondary);
             color: white;
@@ -170,19 +230,41 @@
             width: 100%;
             cursor: pointer;
             font-weight: 600;
-            box-shadow: 0 8px 15px rgba(78,205,196,0.3);
+            box-shadow: 0 8px 15px rgba(78, 205, 196, 0.3);
         }
 
         /* Result Screen */
-        .result-icon { font-size: 80px; margin-bottom: 20px; }
-        .result-status { font-size: 2.5rem; font-weight: bold; margin-bottom: 10px; }
-        .passed { color: #2ecc71; }
-        .failed { color: #e74c3c; }
-        .result-details { font-size: 1.2rem; margin-bottom: 30px; line-height: 1.6; }
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .result-status {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .passed {
+            color: #2ecc71;
+        }
+
+        .failed {
+            color: #e74c3c;
+        }
+
+        .result-details {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
 
         .confetti {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
             z-index: 100;
             display: none;
@@ -191,6 +273,7 @@
         .level-btn:nth-child(5) {
             grid-column: 1 / -1;
         }
+
         .level-btn.locked {
             opacity: 0.6;
             cursor: not-allowed;
@@ -199,12 +282,20 @@
         }
 
         @keyframes confetti-fall {
-            0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+            0% {
+                transform: translateY(-100%) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
+
 <body>
 
     <div class="overlay"></div>
@@ -212,17 +303,19 @@
     <div class="container">
         <!-- SCREEN 1: LOGIN & LEVEL -->
         <div id="screen1" class="screen active">
-            <h1>🎮 التحدي العربي</h1>
+            <h1>🎮Exam
+
+            </h1>
             <div class="input-group">
                 <input type="text" id="playerName" placeholder="Enter your name" dir="ltr">
             </div>
-            
+
             <h3>Select Level</h3>
             <div class="level-grid" id="levelGrid">
                 <!-- Levels will be injected here -->
             </div>
 
-            <button class="btn-main" onclick="goToGame()">LET'S GO! 🚀</button>
+            <button class="btn-main" onclick="goToGame()">LET'S GO 🚀</button>
         </div>
 
         <!-- SCREEN 2: GAME -->
@@ -234,7 +327,7 @@
             <div class="timer-bar">
                 <div id="timerFill" class="timer-fill"></div>
             </div>
-            
+
             <div class="letter-display" id="letterContainer">
                 <div class="base-letter">أ</div>
             </div>
@@ -242,7 +335,7 @@
             <div class="game-buttons">
                 <button class="btn-next" onclick="nextLetter()">NEXT ➡️</button>
             </div>
-            
+
             <p style="margin-top: 20px; color: #666; font-size: 0.9rem;">Tap Next after saying the letter!</p>
         </div>
 
@@ -253,20 +346,21 @@
             <div class="result-details" id="resultDetails">
                 You said 20 letters!<br>Requirement: 15
             </div>
-            
+
             <button class="btn-main" onclick="restart()">TRY AGAIN 🔄</button>
-            <button id="shareBtn" class="btn-main" style="background: #25D366; margin-top: 10px;" onclick="shareResult()">SHARE SCREENSHOT 📸</button>
+            <button id="shareBtn" class="btn-main" style="background: #25D366; margin-top: 10px;"
+                onclick="shareResult()">SHARE SCREENSHOT 📸</button>
         </div>
     </div>
 
     <canvas id="confetti" class="confetti"></canvas>
 
     <script>
-        const arabicLetters = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
+        const arabicLetters = ["ا", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي"];
         const harakat = [
-            {mark: "َ", class: "fatha"},
-            {mark: "ِ", class: "kasra"},
-            {mark: "ُ", class: "damma"}
+            { mark: "َ", class: "fatha" },
+            { mark: "ِ", class: "kasra" },
+            { mark: "ُ", class: "damma" }
         ];
 
         const levels = {
@@ -305,7 +399,7 @@
         function selectLevel(lvl, btn) {
             currentLevel = lvl;
             document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('selected'));
-            if(btn) btn.classList.add('selected');
+            if (btn) btn.classList.add('selected');
         }
 
         // Initialize levels on load
@@ -318,7 +412,7 @@
                 return;
             }
             player = name;
-            
+
             // Prepare letters for level
             const lvl = levels[currentLevel];
             const lettersPool = arabicLetters.slice(lvl.start, lvl.end);
@@ -333,7 +427,7 @@
             document.getElementById('targetScore').textContent = lvl.target;
             document.getElementById('currentScore').textContent = 0;
             score = 0;
-            
+
             showScreen(2);
             startCountdown();
         }
@@ -364,7 +458,7 @@
 
         function nextLetter(isStart = false) {
             if (!gameActive && !isStart) return;
-            
+
             if (!isStart) {
                 score++;
                 document.getElementById('currentScore').textContent = score;
@@ -372,14 +466,14 @@
 
             const r = currentLetters[Math.floor(Math.random() * currentLetters.length)];
             const container = document.getElementById('letterContainer');
-            
+
             // All letters bold as requested
             const isBold = "font-weight: 900;";
-            
+
             container.innerHTML = `
                 <span class="base-letter" style="${isBold}">${r.base}</span><span class="${r.class}">${r.mark}</span>
             `;
-            
+
             // Animation for new letter
             container.style.animation = 'none';
             container.offsetHeight; /* trigger reflow */
@@ -396,24 +490,24 @@
             const detailsEl = document.getElementById('resultDetails');
 
             if (passed) {
-                statusEl.textContent = "Passed!";
+                statusEl.textContent = "Passed";
                 statusEl.className = "result-status passed";
                 iconEl.textContent = "🎉";
-                detailsEl.innerHTML = `Awesome job ${player}!<br>You said <b>${score}</b> letters.<br>Required: ${target}`;
-                
+                detailsEl.innerHTML = `അടിപൊളിയായിട്ടുണ്ട്,  ${player}<br>നിങ്ങൾ  <b>${score}</b> അക്ഷരങ്ങൾ പറഞ്ഞു.<br>വിജയിക്കാൻ ആവശ്യമായത്: ${target}`;
+
                 // Unlock next level if applicable
                 if (currentLevel === highestUnlockedLevel && currentLevel < 5) {
                     highestUnlockedLevel++;
                     localStorage.setItem('unlockedLevel', highestUnlockedLevel);
                     renderLevels();
                 }
-                
+
                 startConfetti();
             } else {
                 statusEl.textContent = "Failed";
                 statusEl.className = "result-status failed";
                 iconEl.textContent = "🦾";
-                detailsEl.innerHTML = `Good try ${player}!<br>You said <b>${score}</b> letters.<br>Required: ${target}`;
+                detailsEl.innerHTML = `Good try ${player}<br>നിങ്ങൾ <b>${score}</b> അക്ഷരങ്ങളെ പറഞ്ഞിട്ടുള്ളൂ.<br>വിജയിക്കാൻ ആവശ്യമായത്: ${target}</b> അക്ഷരങ്ങൾ.`;
             }
 
             showScreen(3);
@@ -434,7 +528,7 @@
             const passed = score >= levels[currentLevel].target;
             const emoji = passed ? "🎉" : "💪";
             const status = passed ? "Passed" : "Failed";
-            const msg = `🎮 Arabic Letter Exam Result\n\n👤 Player: ${player}\n📊 Level: ${currentLevel}\n🏆 Status: ${status}\n⭐ Score: ${score}\n\n${emoji} Keep learning!`;
+            const msg = `🎮 Arabic Letter Exam Result\n\n👤 Player: ${player}\n📊 Level: ${currentLevel}\n🏆 Status: ${status}\n⭐ Score: ${score}\n\n${emoji} Keep learning`;
 
             try {
                 const canvas = await html2canvas(screen, {
@@ -442,7 +536,7 @@
                     backgroundColor: "#ffffff",
                     borderRadius: 30
                 });
-                
+
                 canvas.toBlob(async (blob) => {
                     const file = new File([blob], "result.png", { type: "image/png" });
 
@@ -458,7 +552,7 @@
                         }
                     } else {
                         // Fallback
-                        alert("Downloading screenshot... We will now open WhatsApp to share it!");
+                        alert("Downloading screenshot... We will now open WhatsApp to share it");
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url;
@@ -513,4 +607,5 @@
         }
     </script>
 </body>
+
 </html>
