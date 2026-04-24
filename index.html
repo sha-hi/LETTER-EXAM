@@ -303,7 +303,7 @@
     <div class="container">
         <!-- SCREEN 1: LOGIN & LEVEL -->
         <div id="screen1" class="screen active">
-            <h1>🎮Exam
+            <h1>🎮Level Up Reading Skill
 
             </h1>
             <div class="input-group">
@@ -312,16 +312,23 @@
 
             <h3>Select Section</h3>
             <div class="level-grid" style="margin-top: 10px; margin-bottom: 20px;">
-                <button class="level-btn selected" id="sec1Btn" onclick="selectSection(1)">Section 1<br><small>Basic Harakat</small></button>
-                <button class="level-btn" id="sec2Btn" onclick="selectSection(2)">Section 2<br><small>With Tanween</small></button>
-                <button class="level-btn" id="sec3Btn" onclick="selectSection(3)" style="grid-column: 1 / -1;">Practice<br><small>Unlimited Time</small></button>
+                <button class="level-btn selected" id="sec1Btn" onclick="selectSection(1)">Section 1<br><small>Basic
+                        Harakat</small></button>
+                <button class="level-btn" id="sec2Btn" onclick="selectSection(2)">Section 2<br><small>With
+                        Tanween</small></button>
+                <button class="level-btn" id="sec3Btn" onclick="selectSection(3)"
+                    style="grid-column: 1 / -1;">Practice<br><small>Unlimited Time</small></button>
             </div>
 
             <button class="btn-main" onclick="goToLevelSelect()">NEXT ➡️</button>
 
             <div style="margin-top: 35px; padding-top: 25px; border-top: 2px dashed rgba(0,0,0,0.1);">
-                <p style="margin: 0 0 10px 0; color: #7f8c8d; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">Discover More</p>
-                <button class="btn-main" style="background: linear-gradient(135deg, #8e44ad, #2980b9); margin-top: 0; width: 100%; font-size: 1rem; padding: 15px 20px; box-shadow: 0 10px 20px rgba(142, 68, 173, 0.2); letter-spacing: 0.5px;" onclick="alert('🔒 Locked! Check back later.')">
+                <p
+                    style="margin: 0 0 10px 0; color: #7f8c8d; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
+                    Discover More</p>
+                <button class="btn-main"
+                    style="background: linear-gradient(135deg, #8e44ad, #2980b9); margin-top: 0; width: 100%; font-size: 1rem; padding: 15px 20px; box-shadow: 0 10px 20px rgba(142, 68, 173, 0.2); letter-spacing: 0.5px;"
+                    onclick="alert('🔒 Locked! Check back later.')">
                     ✨ SHAHID RAHMANI LEARNING HUB 🔒
                 </button>
             </div>
@@ -334,7 +341,8 @@
                 <!-- Levels will be injected here -->
             </div>
             <div style="display: flex; gap: 10px; justify-content: center; margin-top: 25px;">
-                <button class="btn-main" style="background: #95a5a6; margin-top: 0;" onclick="showScreen('screen1')">BACK ⬅️</button>
+                <button class="btn-main" style="background: #95a5a6; margin-top: 0;"
+                    onclick="showScreen('screen1')">BACK ⬅️</button>
                 <button class="btn-main" style="margin-top: 0;" onclick="goToGame()">LET'S GO 🚀</button>
             </div>
         </div>
@@ -354,7 +362,9 @@
             </div>
 
             <div class="game-buttons">
-                <button id="gameHomeBtn" class="btn-next" style="background: #95a5a6; width: auto; padding: 20px 30px; display: none;" onclick="mainMenu()">🏠</button>
+                <button id="gameHomeBtn" class="btn-next"
+                    style="background: #95a5a6; width: auto; padding: 20px 30px; display: none;"
+                    onclick="mainMenu()">🏠</button>
                 <button class="btn-next" onclick="nextLetter()" style="flex: 1;">NEXT ➡️</button>
             </div>
 
@@ -370,7 +380,8 @@
             </div>
 
             <button class="btn-main" onclick="restart()">TRY AGAIN 🔄</button>
-            <button class="btn-main" style="background: #95a5a6; margin-top: 10px;" onclick="mainMenu()">MAIN MENU 🏠</button>
+            <button class="btn-main" style="background: #95a5a6; margin-top: 10px;" onclick="mainMenu()">MAIN MENU
+                🏠</button>
             <button id="shareBtn" class="btn-main" style="background: #25D366; margin-top: 10px;"
                 onclick="shareResult()">SHARE SCREENSHOT 📸</button>
         </div>
@@ -435,7 +446,7 @@
             currentSection = sec;
             document.getElementById('sec1Btn').classList.remove('selected');
             document.getElementById('sec2Btn').classList.remove('selected');
-            if(document.getElementById('sec3Btn')) document.getElementById('sec3Btn').classList.remove('selected');
+            if (document.getElementById('sec3Btn')) document.getElementById('sec3Btn').classList.remove('selected');
             document.getElementById('sec' + sec + 'Btn').classList.add('selected');
             currentLevel = 1;
         }
@@ -454,9 +465,10 @@
                 const isLocked = i > unlocked;
                 const lockIcon = isLocked ? "🔒 " : "";
                 const btnClass = isLocked ? "level-btn locked" : (i === currentLevel ? "level-btn selected" : "level-btn");
+                const subtitle = currentSection === 3 ? "Endless Practice" : `${lvl.target} letters / ${lvl.time}s`;
                 grid.innerHTML += `
                     <button class="${btnClass}" onclick="if(!${isLocked}) selectLevel(${i}, this)" ${isLocked ? 'disabled' : ''}>
-                        ${lockIcon}${lvl.label}<br><small>${lvl.target} letters / ${lvl.time}s</small>
+                        ${lockIcon}${lvl.label}<br><small>${subtitle}</small>
                     </button>
                 `;
             }
@@ -478,13 +490,7 @@
                 return;
             }
             player = name;
-            
-            if (currentSection === 3) {
-                // Skip level selection for Practice mode
-                goToGame();
-                return;
-            }
-            
+
             renderLevels();
             showScreen('screenLevelSelect');
         }
@@ -492,7 +498,7 @@
         function goToGame() {
             // Prepare letters for level
             const lvl = levels[currentLevel];
-            const lettersPool = currentSection === 3 ? arabicLetters : arabicLetters.slice(lvl.start, lvl.end);
+            const lettersPool = arabicLetters.slice(lvl.start, lvl.end);
             currentLetters = [];
             const activeHarakat = harakatSections[currentSection];
             lettersPool.forEach(l => {
@@ -505,7 +511,7 @@
             document.getElementById('targetScore').textContent = lvl.target;
             document.getElementById('currentScore').textContent = 0;
             score = 0;
-            
+
             if (currentSection === 3) {
                 document.getElementById('gameHomeBtn').style.display = 'block';
                 document.getElementById('goalContainer').style.display = 'none';
@@ -537,7 +543,7 @@
                 timeLeft = levels[currentLevel].time;
                 const totalTime = timeLeft;
                 document.getElementById('timerFill').style.width = "100%";
-                
+
                 timer = setInterval(() => {
                     timeLeft -= 0.1;
                     const percent = (timeLeft / totalTime) * 100;
